@@ -13,17 +13,17 @@
   },
   "scripts": {
     "dev": "vite",
-    "dev:server": "node --watch server/index.js",
-    "start": "node server/index.js",
+    "dev:cloudflare": "npm run build && wrangler pages dev dist --binding ALLOW_ANONYMOUS_SYNC=true --binding ANONYMOUS_WORKSPACE_ID=local",
     "build": "vite build",
     "preview": "vite preview",
+    "deploy:cloudflare": "npm run build && wrangler pages deploy dist --project-name=qyrova-leads",
+    "db:migrate:local": "wrangler d1 execute DB --local --file=migrations/0001_initial.sql",
+    "db:migrate:remote": "wrangler d1 execute DB --remote --file=migrations/0001_initial.sql",
     "lint": "eslint .",
     "test": "vitest run",
     "check": "npm run lint && npm run test && npm run build"
   },
   "dependencies": {
-    "dotenv": "^17.4.2",
-    "express": "^5.1.0",
     "lucide-react": "^1.17.0",
     "papaparse": "^5.4.1",
     "react": "^19.0.0",
@@ -38,6 +38,7 @@
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
     "vite": "^8.0.16",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.8",
+    "wrangler": "^4.99.0"
   }
 }

@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { normalizeGooglePlace } from "./googlePlaces";
-import { normalizeOpenStreetMapPlace } from "./openStreetMap";
-import { normalizeYelpBusiness } from "./yelp";
+import {
+  normalizeGooglePlace,
+  normalizeOpenStreetMapPlace,
+  normalizeYelpBusiness,
+} from "./providers";
 
-describe("provider normalization", () => {
+describe("Cloudflare provider normalization", () => {
   it("normalizes Google Places records", () => {
     const result = normalizeGooglePlace({
       id: "place-1",
@@ -48,3 +50,4 @@ describe("provider normalization", () => {
     });
   });
 });
+

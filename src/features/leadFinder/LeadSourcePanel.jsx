@@ -34,7 +34,7 @@ export default function LeadSourcePanel({
         <div>
           <span className="eyebrow">Live sources</span>
           <h3>Choose where to search</h3>
-          <p>Credentials remain on the integration server and are never saved in the browser.</p>
+          <p>Credentials remain in Cloudflare Pages Functions and are never saved in the browser.</p>
         </div>
         <button className="button button-secondary" onClick={() => mapsInput.current?.click()}>
           <FileUp size={16} /> Import Google Maps export
@@ -52,7 +52,7 @@ export default function LeadSourcePanel({
         <div className="integration-alert">
           <KeyRound size={17} />
           <span>
-            {statusError} Run <code>npm run dev:server</code>.
+            {statusError} Check the Pages Functions deployment and Cloudflare environment variables.
           </span>
         </div>
       )}

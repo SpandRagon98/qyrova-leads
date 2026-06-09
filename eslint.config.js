@@ -5,7 +5,13 @@ import reactRefresh from "eslint-plugin-react-refresh";
 
 export default [
   {
-    ignores: ["dist/**", "node_modules/**", "work/**", "coverage/**"],
+    ignores: [
+      ".wrangler/**",
+      "dist/**",
+      "node_modules/**",
+      "work/**",
+      "coverage/**",
+    ],
   },
   js.configs.recommended,
   {
@@ -29,11 +35,19 @@ export default [
     },
   },
   {
-    files: ["server/**/*.js", "vite.config.js", "eslint.config.js"],
+    files: ["vite.config.js", "eslint.config.js"],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
       globals: globals.node,
+    },
+  },
+  {
+    files: ["functions/**/*.js"],
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
+      globals: globals.worker,
     },
   },
   {

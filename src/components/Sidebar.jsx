@@ -24,7 +24,7 @@ const navItems = [
   { id: "settings", label: "Settings", icon: Settings },
 ];
 
-export default function Sidebar({ activePage, onNavigate, isOpen, onClose }) {
+export default function Sidebar({ activePage, cloudSync, onNavigate, isOpen, onClose }) {
   return (
     <>
       {isOpen && <button className="sidebar-backdrop" aria-label="Close navigation" onClick={onClose} />}
@@ -71,7 +71,7 @@ export default function Sidebar({ activePage, onNavigate, isOpen, onClose }) {
             <div className="avatar">QT</div>
             <div>
               <strong>Qyrova Team</strong>
-              <span>Local workspace</span>
+              <span>{cloudSync?.state === "ready" ? "Cloud workspace" : "Local workspace"}</span>
             </div>
           </div>
         </div>
