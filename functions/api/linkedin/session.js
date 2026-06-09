@@ -1,11 +1,11 @@
-import { requireDatabase } from "../../_shared/database.js";
+import { ensureDatabase } from "../../_shared/database.js";
 import { cleanText, json, jsonError } from "../../_shared/http.js";
 
 export async function onRequestGet({ request, env }) {
   const ticket = cleanText(new URL(request.url).searchParams.get("ticket"), 120);
   if (!ticket) return jsonError(400, "LinkedIn session ticket is missing.");
   try {
-    const db = requireDatabase(env);
+    const db = await ensureDatabase(env);
     const row = await db
       .prepare(
         "DELETE FROM oauth_tickets WHERE ticket = ?1 AND expires_at > ?2 RETURNING profile_data",
@@ -30,4 +30,3 @@ export async function onRequestGet({ request, env }) {
     return jsonError(503, error.message);
   }
 }
-

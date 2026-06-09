@@ -1,4 +1,4 @@
-import { requireDatabase } from "../../_shared/database.js";
+import { ensureDatabase } from "../../_shared/database.js";
 import {
   cleanText,
   fetchJson,
@@ -39,7 +39,7 @@ export async function onRequestGet({ request, env }) {
     return redirect(request, env, "error");
   }
   try {
-    const db = requireDatabase(env);
+    const db = await ensureDatabase(env);
     const storedState = await db
       .prepare(
         "DELETE FROM oauth_states WHERE state = ?1 AND expires_at > ?2 RETURNING state",
@@ -81,4 +81,3 @@ export async function onRequestGet({ request, env }) {
     return redirect(request, env, "error");
   }
 }
-

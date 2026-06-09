@@ -1,5 +1,5 @@
 import { jsonError, requestOrigin, secureCookie } from "../../_shared/http.js";
-import { requireDatabase } from "../../_shared/database.js";
+import { ensureDatabase } from "../../_shared/database.js";
 
 function randomToken() {
   const bytes = crypto.getRandomValues(new Uint8Array(32));
@@ -18,7 +18,7 @@ export async function onRequestGet({ request, env }) {
     return jsonError(503, "LinkedIn OpenID Connect is not configured.");
   }
   try {
-    const db = requireDatabase(env);
+    const db = await ensureDatabase(env);
     const state = randomToken();
     await db
       .prepare(
@@ -48,4 +48,3 @@ export async function onRequestGet({ request, env }) {
     return jsonError(503, error.message);
   }
 }
-

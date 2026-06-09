@@ -53,9 +53,7 @@ Open `http://127.0.0.1:8788` for the full-stack environment.
 npm run dev                 # Vite frontend
 npm run dev:cloudflare      # Pages assets, Functions, and local D1
 npm run db:migrate:local    # Apply the D1 schema locally
-npm run db:migrate:remote   # Apply the D1 schema to qyrova-leads
 npm run build               # Production frontend
-npm run deploy:cloudflare   # Direct deployment with Wrangler
 npm run lint
 npm test
 npm run check
@@ -64,7 +62,7 @@ npm run check
 ## Project Structure
 
 ```text
-.github/workflows/  verification and Cloudflare deployment
+.github/workflows/  code verification
 docs/               deployment and provider setup
 functions/
   _shared/          Pages Function helpers and provider adapters
@@ -83,11 +81,12 @@ src/
 
 ## Deployment
 
-The workflow at `.github/workflows/deploy.yml` verifies every pull request and deploys `main` to
-Cloudflare Pages when the Cloudflare repository secrets are configured.
+The workflow at `.github/workflows/deploy.yml` verifies every pull request and push to `main`.
+Cloudflare Pages deploys `main` through its native GitHub integration. D1 tables are initialized
+automatically on the first API request.
 
-See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for D1, Cloudflare Access, GitHub secrets, provider
-credentials, LinkedIn callback configuration, and go-live verification.
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for D1, Cloudflare Access, Pages build settings,
+provider credentials, LinkedIn callback configuration, and go-live verification.
 
 ## Data and Compliance
 

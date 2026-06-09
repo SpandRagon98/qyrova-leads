@@ -16,9 +16,7 @@
     "dev:cloudflare": "npm run build && wrangler pages dev dist --binding ALLOW_ANONYMOUS_SYNC=true --binding ANONYMOUS_WORKSPACE_ID=local",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy:cloudflare": "npm run build && wrangler pages deploy dist --project-name=qyrova-leads",
     "db:migrate:local": "wrangler d1 execute DB --local --file=migrations/0001_initial.sql",
-    "db:migrate:remote": "wrangler d1 execute DB --remote --file=migrations/0001_initial.sql",
     "lint": "eslint .",
     "test": "vitest run",
     "check": "npm run lint && npm run test && npm run build"

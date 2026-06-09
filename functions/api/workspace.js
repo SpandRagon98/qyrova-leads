@@ -1,4 +1,4 @@
-import { accessIdentity, requireDatabase } from "../_shared/database.js";
+import { accessIdentity, ensureDatabase } from "../_shared/database.js";
 import { json, jsonError, readJson } from "../_shared/http.js";
 
 export async function onRequestGet({ request, env }) {
@@ -7,7 +7,7 @@ export async function onRequestGet({ request, env }) {
     return jsonError(401, "Cloud sync requires Cloudflare Access authentication.");
   }
   try {
-    const db = requireDatabase(env);
+    const db = await ensureDatabase(env);
     const row = await db
       .prepare(
         "SELECT workspace_data, updated_at FROM workspace_snapshots WHERE user_id = ?1",
@@ -30,7 +30,7 @@ export async function onRequestPut({ request, env }) {
     return jsonError(401, "Cloud sync requires Cloudflare Access authentication.");
   }
   try {
-    const db = requireDatabase(env);
+    const db = await ensureDatabase(env);
     const body = await readJson(request);
     const data = body.data;
     if (
@@ -59,4 +59,3 @@ export async function onRequestPut({ request, env }) {
     return jsonError(status, error.message);
   }
 }
-
