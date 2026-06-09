@@ -23,7 +23,15 @@ const Settings = lazy(() => import("../pages/Settings"));
 const LeadForm = lazy(() => import("../components/LeadForm"));
 
 export default function App() {
-  const { data, setData, leads, addLead, updateLead, deleteLeads } = useAppData();
+  const {
+    data,
+    setData,
+    leads,
+    addLead,
+    updateLead,
+    deleteLeads,
+    cloudSync,
+  } = useAppData();
   const [activePage, setActivePage] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [globalSearch, setGlobalSearch] = useState("");
@@ -238,6 +246,7 @@ export default function App() {
         key={JSON.stringify(data.settings)}
         settings={data.settings}
         data={data}
+        cloudSync={cloudSync}
         setData={setData}
         onSave={(settings) => setData((current) => ({ ...current, settings }))}
         onReset={() => setResetOpen(true)}
@@ -250,6 +259,7 @@ export default function App() {
     <div className="app-shell">
       <Sidebar
         activePage={activePage}
+        cloudSync={cloudSync}
         onNavigate={navigate}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}

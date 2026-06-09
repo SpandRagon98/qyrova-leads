@@ -1,9 +1,9 @@
-import { AlertTriangle, CloudOff, Database, PlugZap, RotateCcw, Save, ShieldCheck } from "lucide-react";
+import { AlertTriangle, Cloud, CloudOff, Database, PlugZap, RotateCcw, Save, ShieldCheck } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { downloadBackup, readBackup } from "../services/storageService";
 import { getIntegrationStatus } from "../services/integrationService";
 
-export default function Settings({ settings, data, onSave, onReset, setData, notify }) {
+export default function Settings({ settings, data, cloudSync, onSave, onReset, setData, notify }) {
   const [draft, setDraft] = useState(settings);
   const [integrationStatus, setIntegrationStatus] = useState(null);
   const restoreInput = useRef(null);
@@ -40,7 +40,7 @@ export default function Settings({ settings, data, onSave, onReset, setData, not
         </section>
 
         <section className="panel settings-section">
-          <div className="settings-section-head"><div className="settings-icon"><PlugZap size={19} /></div><div><h3>Lead source connections</h3><p>Secrets are read from the local server environment, never from browser storage.</p></div></div>
+          <div className="settings-section-head"><div className="settings-icon"><PlugZap size={19} /></div><div><h3>Lead source connections</h3><p>Secrets are read by Cloudflare Pages Functions and never exposed to browser storage.</p></div></div>
           <div className="integration-status-grid">
             {[
               ["google", "Google Places", "GOOGLE_PLACES_API_KEY"],
@@ -51,18 +51,18 @@ export default function Settings({ settings, data, onSave, onReset, setData, not
             ].map(([id, label, environment]) => (
               <div className="integration-status-item" key={id}>
                 <span className={integrationStatus?.[id]?.configured ? "ready" : ""} />
-                <div><strong>{integrationStatus?.[id]?.label || label}</strong><small>{integrationStatus?.[id]?.configured ? "Configured on local server" : `Set ${environment} in .env`}</small></div>
+                <div><strong>{integrationStatus?.[id]?.label || label}</strong><small>{integrationStatus?.[id]?.configured ? "Configured in Cloudflare" : `Set ${environment} in Cloudflare`}</small></div>
               </div>
             ))}
           </div>
           <div className="settings-code-note">
-            <code>Copy .env.example to .env</code>
-            <span>Then run <code>npm run dev:server</code> beside <code>npm run dev</code>.</span>
+            <code>Cloudflare Pages → Settings → Variables and Secrets</code>
+            <span>Use encrypted secrets for provider keys and plain variables for public configuration.</span>
           </div>
         </section>
 
         <section className="panel settings-section">
-          <div className="settings-section-head"><div className="settings-icon"><Database size={19} /></div><div><h3>Data management</h3><p>Your information stays in this browser unless you export it.</p></div></div>
+          <div className="settings-section-head"><div className="settings-icon"><Database size={19} /></div><div><h3>Data management</h3><p>D1 sync is automatic when Cloudflare Access is configured; browser storage remains the offline fallback.</p></div></div>
           <div className="data-actions">
             <button onClick={() => downloadBackup(data)}><Database size={18} /><div><strong>Export backup</strong><span>Download all app data as JSON</span></div></button>
             <button onClick={() => restoreInput.current?.click()}><RotateCcw size={18} /><div><strong>Import backup</strong><span>Restore from a Qyrova JSON file</span></div></button>
@@ -77,8 +77,17 @@ export default function Settings({ settings, data, onSave, onReset, setData, not
       </main>
 
       <aside className="settings-aside">
-        <article className="local-data-card"><CloudOff size={26} /><span className="eyebrow eyebrow-light">Private by default</span><h3>Local-only MVP</h3><p>No account, subscription, or paid service is required. Your CRM data is stored in this browser.</p><div><span className="compliance-dot" /> Local persistence active</div></article>
-        <article className="coming-soon-card"><span>Secure connector model</span><h3>No secrets in localStorage</h3><p>Google, Yelp, directory, and LinkedIn credentials stay in the optional local server. LinkedIn open access connects identity only; prospect search requires partner approval.</p></article>
+        <article className="local-data-card">
+          {cloudSync?.state === "local" ? <CloudOff size={26} /> : <Cloud size={26} />}
+          <span className="eyebrow eyebrow-light">Workspace persistence</span>
+          <h3>{cloudSync?.state === "local" ? "Local fallback active" : "Cloudflare D1 sync"}</h3>
+          <p>{cloudSync?.message}</p>
+          <div>
+            <span className="compliance-dot" />
+            {cloudSync?.state === "syncing" ? "Saving changes..." : cloudSync?.email || "Browser persistence active"}
+          </div>
+        </article>
+        <article className="coming-soon-card"><span>Secure connector model</span><h3>No provider secrets in localStorage</h3><p>Google, Yelp, directory, and LinkedIn credentials stay in Cloudflare Pages Functions. LinkedIn open access connects identity only; prospect search requires partner approval.</p></article>
       </aside>
     </div>
   );

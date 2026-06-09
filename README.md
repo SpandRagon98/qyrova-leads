@@ -1,105 +1,99 @@
 # Qyrova Leads
 
-Qyrova Leads is a compliant lead discovery and outreach workspace for Qyrova quotation and
-invoice software. It combines a browser-based CRM with opt-in business data providers, file
-imports, lead scoring, campaign tracking, and deliberately manual LinkedIn outreach.
+Qyrova Leads is a compliant lead discovery and manual outreach workspace for Qyrova quotation
+and invoice software.
 
 ## Features
 
-- Google Places, Yelp, OpenStreetMap, and owner-approved directory searches through a server proxy
+- Browser CRM for leads, scoring, statuses, campaigns, templates, and follow-ups
+- Google Places, Yelp, OpenStreetMap, and permitted public-directory searches
 - Google Maps, CSV, TSV, JSON, and KML imports
-- Lead scoring, pipeline tracking, campaigns, templates, and follow-up dates
-- Dedicated LinkedIn workspace for saved profile URLs and personalized message drafts
-- Official LinkedIn OpenID Connect for the signed-in user's own identity
-- CSV and XLSX exports plus JSON backup and restore
-- Local-first persistence with no lead database required
-- Responsive, route-split React interface
+- CSV and XLSX exports plus complete JSON backup and restore
+- Cloudflare D1 persistence protected by Cloudflare Access
+- Offline browser persistence when cloud sync is unavailable
+- Official LinkedIn OpenID Connect for the signed-in user's identity
+- Manual LinkedIn profile review, message generation, copying, and contact tracking
+- Personalized email drafts and `mailto:` handoff
 
-LinkedIn prospect search, profile scraping, auto-visiting, and automated messaging are not
-implemented. LinkedIn's generally available APIs do not authorize those workflows.
+LinkedIn scraping, prospect API access without approval, automatic profile visits, and automated
+messages are not implemented.
 
-## Quick Start
+## Stack
+
+- React 19 and Vite
+- Cloudflare Pages and Pages Functions
+- Cloudflare D1
+- Cloudflare Access
+- Papa Parse and `write-excel-file`
+
+## Local Development
 
 Requirements: Node.js 22.12 or newer.
+
+Frontend-only development:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open `http://127.0.0.1:4173`. The browser-only features work without provider credentials.
-
-For live provider searches, copy `.env.example` to `.env`, configure the providers you need, and
-run the frontend and API in separate terminals:
+Full Cloudflare development:
 
 ```bash
-npm run dev:server
-npm run dev
+copy .dev.vars.example .dev.vars
+npm run db:migrate:local
+npm run dev:cloudflare
 ```
 
-Never commit `.env` or expose provider secrets through `VITE_*` variables.
+Open `http://127.0.0.1:8788` for the full-stack environment.
 
 ## Commands
 
 ```bash
-npm run dev          # Vite development server
-npm run dev:server   # Integration API with file watching
-npm run build        # Production frontend
-npm start            # Production API and built frontend
-npm run lint         # ESLint
-npm test             # Vitest
-npm run check        # Lint, tests, and production build
+npm run dev                 # Vite frontend
+npm run dev:cloudflare      # Pages assets, Functions, and local D1
+npm run db:migrate:local    # Apply the D1 schema locally
+npm run db:migrate:remote   # Apply the D1 schema to qyrova-leads
+npm run build               # Production frontend
+npm run deploy:cloudflare   # Direct deployment with Wrangler
+npm run lint
+npm test
+npm run check
 ```
 
 ## Project Structure
 
 ```text
-.github/workflows/   CI, GitHub Pages, and container publishing
-docs/                Deployment documentation
-server/
-  config/            Environment configuration
-  middleware/        Request controls
-  providers/         Lead-source adapters
-  routes/            Integration and LinkedIn endpoints
-  services/          Shared server services
+.github/workflows/  verification and Cloudflare deployment
+docs/               deployment and provider setup
+functions/
+  _shared/          Pages Function helpers and provider adapters
+  api/              serverless API routes
+migrations/         D1 schema
 src/
-  app/               Application shell and page loading
-  components/        Reusable UI
-  features/          Feature-specific modules
-  hooks/             State orchestration
-  pages/             Route-level screens
-  services/          Browser API and persistence clients
-  styles/            Application styles
-  utils/             Imports, exports, scoring, and templates
+  app/              application shell
+  components/       reusable interface components
+  features/         feature modules
+  hooks/            local and cloud state orchestration
+  pages/            application pages
+  services/         browser storage, cloud sync, and API clients
+  styles/           responsive application styles
+  utils/            imports, exports, scoring, and templates
 ```
-
-## Provider Setup
-
-Use `.env.example` as the complete configuration reference.
-
-- **Google Places API (New):** requires billing, quota controls, and a server-restricted key.
-- **Yelp:** requires an official Yelp API key.
-- **OpenStreetMap:** requires an identifying contact email and is intended for small manual
-  searches under Nominatim's usage policy.
-- **Public directory:** accepts an app-owner-controlled JSON endpoint template. Browser users
-  cannot supply arbitrary upstream URLs.
-- **LinkedIn:** supports OpenID Connect for the current user's basic profile only. Add the exact
-  server callback URL to the LinkedIn developer application.
 
 ## Deployment
 
-Every push to `main` runs [.github/workflows/deploy.yml](.github/workflows/deploy.yml):
+The workflow at `.github/workflows/deploy.yml` verifies every pull request and deploys `main` to
+Cloudflare Pages when the Cloudflare repository secrets are configured.
 
-1. Installs locked dependencies and runs `npm run check`.
-2. Publishes the static frontend to GitHub Pages.
-3. Publishes the full Docker image to `ghcr.io/spandragon98/qyrova-leads`.
-
-The included `render.yaml` deploys the full application as a Render Docker web service. See
-[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for GitHub Pages, API, Docker, Render, CORS, and LinkedIn
-callback configuration.
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for D1, Cloudflare Access, GitHub secrets, provider
+credentials, LinkedIn callback configuration, and go-live verification.
 
 ## Data and Compliance
 
-Lead data is stored in the current browser's `localStorage`. Provider credentials stay on the
-server. The application searches only configured APIs, imports files supplied by the user, and
-keeps LinkedIn review and sending under direct user control.
+Provider credentials remain in Pages Functions. D1 workspaces are keyed by the authenticated
+Cloudflare Access email. Browser storage remains an offline fallback and can be exported at any
+time.
+
+Use only provider APIs and directories whose terms permit your intended use. LinkedIn outreach
+remains manual and user-controlled.

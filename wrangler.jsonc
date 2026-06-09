@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "qyrova-leads",
+  "compatibility_date": "2026-06-09",
+  "pages_build_output_dir": "./dist",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "qyrova-leads",
+      "database_id": "00000000-0000-0000-0000-000000000000"
+    }
+  ]
+}

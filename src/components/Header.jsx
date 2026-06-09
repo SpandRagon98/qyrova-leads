@@ -9,7 +9,7 @@ const pageDetails = {
   templates: ["Message Templates", "Build reusable, personalized outreach drafts."],
   outreach: ["Outreach Assistant", "Prepare compliant LinkedIn and email outreach."],
   import: ["Import & Export", "Move lead data in and out with confidence."],
-  settings: ["Settings", "Personalize Qyrova Leads and manage local data."],
+  settings: ["Settings", "Personalize Qyrova Leads and manage workspace data."],
 };
 
 export default function Header({

@@ -41,7 +41,7 @@ export const sourceDefinitions = [
     name: "Public directory",
     description: "Connect an owner-approved JSON business directory API.",
     icon: Search,
-    note: "Configured through the local server environment",
+    note: "Configured through Cloudflare environment variables",
   },
 ];
 

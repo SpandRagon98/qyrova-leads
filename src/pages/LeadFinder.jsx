@@ -46,7 +46,7 @@ export default function LeadFinder({
         if (firstConfigured) setProvider(firstConfigured.id);
       })
       .catch(() => {
-        setStatusError("Start the integration server to enable live provider searches.");
+        setStatusError("The Cloudflare integration API is not available.");
       });
   }, []);
 
