@@ -4,11 +4,12 @@ Qyrova Leads can be deployed in two modes.
 
 ## GitHub Pages
 
-The workflow at `.github/workflows/deploy.yml` publishes the static browser application to GitHub Pages after lint, tests, and build pass.
+The workflow at `.github/workflows/deploy.yml` enables GitHub Pages and publishes the static
+browser application after lint, tests, and build pass.
 
-1. Open the repository's **Settings > Pages**.
-2. Select **GitHub Actions** as the source.
-3. Push to `main`, or run **Verify and deploy** manually.
+1. Push to `main`, or run **Verify and deploy** manually.
+2. If an organization policy blocks automatic enablement, open **Settings > Pages** and select
+   **GitHub Actions** as the source.
 
 The static app works without a server for local lead management, CSV/Maps imports, scoring, templates, and manual outreach.
 
