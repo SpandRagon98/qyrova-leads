@@ -11,6 +11,7 @@ and invoice software.
 - CSV and XLSX exports plus complete JSON backup and restore
 - Cloudflare D1 persistence protected by Cloudflare Access
 - Offline browser persistence when cloud sync is unavailable
+- Telegram bot enquiries captured directly as deduplicated CRM leads
 - Official LinkedIn OpenID Connect for the signed-in user's identity
 - Manual LinkedIn profile review, message generation, copying, and contact tracking
 - Personalized email drafts and `mailto:` handoff
@@ -86,11 +87,12 @@ Cloudflare Pages deploys `main` through its native GitHub integration. D1 tables
 automatically on the first API request.
 
 See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for D1, Cloudflare Access, Pages build settings,
-provider credentials, LinkedIn callback configuration, and go-live verification.
+provider credentials, Telegram setup, LinkedIn callback configuration, and go-live verification.
 
 ## Data and Compliance
 
-Provider credentials remain in Pages Functions. D1 workspaces are keyed by the authenticated
+Provider credentials remain in Pages Functions. Telegram bot updates are accepted only when their
+webhook secret matches the server-side value. D1 workspaces are keyed by the authenticated
 Cloudflare Access email. Browser storage remains an offline fallback and can be exported at any
 time.
 

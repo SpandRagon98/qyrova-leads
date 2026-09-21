@@ -70,6 +70,7 @@ DIRECTORY_API_KEY_HEADER=Authorization
 DIRECTORY_API_KEY_PREFIX=Bearer
 DIRECTORY_RESULTS_PATH=results
 LINKEDIN_REDIRECT_URI=https://qyrova-leads-app.pages.dev/api/linkedin/callback
+TELEGRAM_WORKSPACE_ID=owner@example.com
 ```
 
 Encrypted secrets:
@@ -81,6 +82,8 @@ OSM_CONTACT_EMAIL
 DIRECTORY_API_KEY
 LINKEDIN_CLIENT_ID
 LINKEDIN_CLIENT_SECRET
+TELEGRAM_BOT_TOKEN
+TELEGRAM_WEBHOOK_SECRET
 ```
 
 Only configure providers you intend to use.
@@ -118,6 +121,24 @@ Create a LinkedIn developer app, enable **Sign in with LinkedIn using OpenID Con
 the exact production callback URL. This connects the current user's identity only. Lead search,
 profile scraping, automated visits, and automated messages remain unsupported.
 
+### Telegram enquiry bot
+
+1. Message `@BotFather` in Telegram, run `/newbot`, and copy the bot token.
+2. Generate a separate webhook secret containing 24-256 letters, numbers, underscores, or hyphens.
+3. In Cloudflare Pages, add `TELEGRAM_BOT_TOKEN` and `TELEGRAM_WEBHOOK_SECRET` as encrypted secrets.
+4. Set `TELEGRAM_WORKSPACE_ID` to the lowercase Cloudflare Access email that owns the Qyrova
+   workspace. For an explicitly shared anonymous deployment, use the exact
+   `ANONYMOUS_WORKSPACE_ID` instead.
+5. Confirm that `APP_URL` is the exact production origin with no path or trailing slash, then
+   redeploy after saving the variables.
+6. Open Qyrova once and wait for **Cloudflare D1 sync** to show ready.
+7. Open **Settings → Lead source connections** and choose **Connect Telegram**.
+8. Open the displayed bot link, send `/start`, and complete the four-question enquiry.
+
+The token and webhook secret remain server-side. Telegram updates are authenticated, deduplicated,
+and mapped only to the configured workspace. The app checks D1 every ten seconds so new Telegram
+leads appear without a manual refresh.
+
 ## 7. Local development
 
 Copy `.dev.vars.example` to `.dev.vars`, then run:
@@ -142,3 +163,5 @@ After Cloudflare's production deployment succeeds:
 6. Open Settings and confirm **Cloudflare D1 sync** is displayed.
 7. Add a test lead, refresh, and verify it remains.
 8. Test only configured providers.
+9. If Telegram is configured, submit a test enquiry and confirm it appears once with source
+   **Telegram**.

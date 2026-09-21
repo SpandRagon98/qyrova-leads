@@ -1,15 +1,41 @@
-import { AlertTriangle, Cloud, CloudOff, Database, PlugZap, RotateCcw, Save, ShieldCheck } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { AlertTriangle, Cloud, CloudOff, Database, ExternalLink, LoaderCircle, MessageCircle, PlugZap, RotateCcw, Save, ShieldCheck } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { downloadBackup, readBackup } from "../services/storageService";
-import { getIntegrationStatus } from "../services/integrationService";
+import { getIntegrationStatus, setupTelegram } from "../services/integrationService";
 
 export default function Settings({ settings, data, cloudSync, onSave, onReset, setData, notify }) {
   const [draft, setDraft] = useState(settings);
   const [integrationStatus, setIntegrationStatus] = useState(null);
+  const [telegramBusy, setTelegramBusy] = useState(false);
   const restoreInput = useRef(null);
+  const refreshIntegrations = useCallback(
+    () =>
+      getIntegrationStatus()
+        .then(setIntegrationStatus)
+        .catch(() => setIntegrationStatus({})),
+    [],
+  );
   useEffect(() => {
-    getIntegrationStatus().then(setIntegrationStatus).catch(() => setIntegrationStatus({}));
-  }, []);
+    refreshIntegrations();
+  }, [refreshIntegrations]);
+
+  const connectTelegram = async () => {
+    setTelegramBusy(true);
+    try {
+      const result = await setupTelegram();
+      notify(
+        result.connected
+          ? `Telegram connected${result.botUsername ? ` as @${result.botUsername}` : ""}`
+          : "Telegram webhook registration is still pending.",
+        result.connected ? "success" : "error",
+      );
+      await refreshIntegrations();
+    } catch (error) {
+      notify(error.message, "error");
+    } finally {
+      setTelegramBusy(false);
+    }
+  };
 
   const importBackup = async (file) => {
     if (!file) return;
@@ -48,12 +74,28 @@ export default function Settings({ settings, data, cloudSync, onSave, onReset, s
               ["yelp", "Yelp", "YELP_API_KEY"],
               ["directory", "Public directory", "DIRECTORY_API_URL_TEMPLATE"],
               ["linkedin", "LinkedIn OIDC", "LINKEDIN_CLIENT_ID + secret"],
+              ["telegram", "Telegram Bot", "TELEGRAM_BOT_TOKEN + webhook settings"],
             ].map(([id, label, environment]) => (
               <div className="integration-status-item" key={id}>
-                <span className={integrationStatus?.[id]?.configured ? "ready" : ""} />
-                <div><strong>{integrationStatus?.[id]?.label || label}</strong><small>{integrationStatus?.[id]?.configured ? "Configured in Cloudflare" : `Set ${environment} in Cloudflare`}</small></div>
+                <span className={(id === "telegram" ? integrationStatus?.telegram?.connected : integrationStatus?.[id]?.configured) ? "ready" : ""} />
+                <div><strong>{integrationStatus?.[id]?.label || label}</strong><small>{id === "telegram" ? (integrationStatus?.telegram?.connected ? `Connected${integrationStatus.telegram.botUsername ? ` as @${integrationStatus.telegram.botUsername}` : ""}` : integrationStatus?.telegram?.configured ? "Configured; register the webhook below" : `Set ${environment} in Cloudflare`) : integrationStatus?.[id]?.configured ? "Configured in Cloudflare" : `Set ${environment} in Cloudflare`}</small></div>
               </div>
             ))}
+          </div>
+          <div className="telegram-connection-card">
+            <div className="telegram-mark"><MessageCircle size={20} /></div>
+            <div>
+              <strong>Telegram enquiry bot</strong>
+              <p>Collects a name, business, contact detail and requirement, then creates or updates the lead in Qyrova automatically.</p>
+              {integrationStatus?.telegram?.lastError && <small>{integrationStatus.telegram.lastError}</small>}
+            </div>
+            <div className="telegram-actions">
+              {integrationStatus?.telegram?.botUrl && <a className="button button-secondary" href={integrationStatus.telegram.botUrl} target="_blank" rel="noreferrer">Open bot <ExternalLink size={14} /></a>}
+              <button className="button button-primary" disabled={telegramBusy || !integrationStatus?.telegram?.configured} onClick={connectTelegram}>
+                {telegramBusy ? <LoaderCircle className="spin" size={15} /> : <PlugZap size={15} />}
+                {integrationStatus?.telegram?.connected ? "Reconnect webhook" : "Connect Telegram"}
+              </button>
+            </div>
           </div>
           <div className="settings-code-note">
             <code>Cloudflare Pages → Settings → Variables and Secrets</code>
@@ -87,7 +129,7 @@ export default function Settings({ settings, data, cloudSync, onSave, onReset, s
             {cloudSync?.state === "syncing" ? "Saving changes..." : cloudSync?.email || "Browser persistence active"}
           </div>
         </article>
-        <article className="coming-soon-card"><span>Secure connector model</span><h3>No provider secrets in localStorage</h3><p>Google, Yelp, directory, and LinkedIn credentials stay in Cloudflare Pages Functions. LinkedIn open access connects identity only; prospect search requires partner approval.</p></article>
+        <article className="coming-soon-card"><span>Secure connector model</span><h3>No provider secrets in localStorage</h3><p>Google, Yelp, directory, LinkedIn, and Telegram credentials stay in Cloudflare Pages Functions. LinkedIn open access connects identity only; prospect search requires partner approval.</p></article>
       </aside>
     </div>
   );
