@@ -42,30 +42,6 @@ export async function ensureDatabase(env) {
           )`,
         ),
         db.prepare(
-          `CREATE TABLE IF NOT EXISTS telegram_sessions (
-            chat_id TEXT PRIMARY KEY,
-            workspace_id TEXT NOT NULL,
-            step TEXT NOT NULL,
-            draft_data TEXT NOT NULL,
-            updated_at TEXT NOT NULL
-          )`,
-        ),
-        db.prepare(
-          `CREATE TABLE IF NOT EXISTS telegram_updates (
-            update_id TEXT PRIMARY KEY,
-            processed_at TEXT NOT NULL
-          )`,
-        ),
-        db.prepare(
-          `CREATE TABLE IF NOT EXISTS telegram_integrations (
-            workspace_id TEXT PRIMARY KEY,
-            bot_username TEXT NOT NULL,
-            webhook_url TEXT NOT NULL,
-            connected_at TEXT NOT NULL,
-            last_error TEXT NOT NULL DEFAULT ''
-          )`,
-        ),
-        db.prepare(
           "CREATE INDEX IF NOT EXISTS idx_oauth_states_expiry ON oauth_states(expires_at)",
         ),
         db.prepare(
@@ -73,12 +49,6 @@ export async function ensureDatabase(env) {
         ),
         db.prepare(
           "CREATE INDEX IF NOT EXISTS idx_rate_limits_expiry ON rate_limits(expires_at)",
-        ),
-        db.prepare(
-          "CREATE INDEX IF NOT EXISTS idx_telegram_sessions_workspace ON telegram_sessions(workspace_id)",
-        ),
-        db.prepare(
-          "CREATE INDEX IF NOT EXISTS idx_telegram_updates_time ON telegram_updates(processed_at)",
         ),
       ])
       .catch((error) => {

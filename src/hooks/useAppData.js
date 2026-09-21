@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { INITIAL_DATA } from "../data/defaultData";
 import { enrichLead } from "../utils/leadScoring";
 import { loadAppData, saveAppData } from "../services/storageService";
@@ -18,7 +18,7 @@ function mergeWorkspace(fallback, saved) {
 }
 
 export function useAppData() {
-  const [data, setDataState] = useState(() => loadAppData(INITIAL_DATA));
+  const [data, setData] = useState(() => loadAppData(INITIAL_DATA));
   const [cloudSync, setCloudSync] = useState({
     state: "checking",
     email: "",
@@ -26,15 +26,6 @@ export function useAppData() {
     message: "Checking Cloudflare D1 availability...",
   });
   const cloudReady = useRef(false);
-  const localDirty = useRef(false);
-  const localRevision = useRef(0);
-  const remoteUpdatedAt = useRef(null);
-
-  const setData = useCallback((value) => {
-    localDirty.current = true;
-    localRevision.current += 1;
-    setDataState(value);
-  }, []);
 
   useEffect(() => {
     const timer = window.setTimeout(() => saveAppData(data), 150);
@@ -47,11 +38,9 @@ export function useAppData() {
       .then((response) => {
         if (cancelled) return;
         if (response.data) {
-          setDataState((current) => mergeWorkspace(current, response.data));
+          setData((current) => mergeWorkspace(current, response.data));
         }
         cloudReady.current = true;
-        localDirty.current = false;
-        remoteUpdatedAt.current = response.updatedAt || null;
         setCloudSync({
           state: "ready",
           email: response.identity?.email || "",
@@ -80,14 +69,11 @@ export function useAppData() {
   }, []);
 
   useEffect(() => {
-    if (!cloudReady.current || !localDirty.current) return undefined;
-    const revision = localRevision.current;
+    if (!cloudReady.current) return undefined;
     const timer = window.setTimeout(() => {
       setCloudSync((current) => ({ ...current, state: "syncing" }));
       saveCloudWorkspace(data)
         .then((response) => {
-          remoteUpdatedAt.current = response.updatedAt || null;
-          if (localRevision.current === revision) localDirty.current = false;
           setCloudSync((current) => ({
             ...current,
             state: "ready",
@@ -105,32 +91,6 @@ export function useAppData() {
     }, 800);
     return () => window.clearTimeout(timer);
   }, [data]);
-
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      if (!cloudReady.current || localDirty.current) return;
-      loadCloudWorkspace()
-        .then((response) => {
-          if (
-            !response.data ||
-            !response.updatedAt ||
-            response.updatedAt === remoteUpdatedAt.current
-          ) {
-            return;
-          }
-          remoteUpdatedAt.current = response.updatedAt;
-          setDataState((current) => mergeWorkspace(current, response.data));
-          setCloudSync((current) => ({
-            ...current,
-            state: "ready",
-            updatedAt: response.updatedAt,
-            message: "Cloud workspace updated from an external integration.",
-          }));
-        })
-        .catch(() => undefined);
-    }, 10_000);
-    return () => window.clearInterval(timer);
-  }, []);
 
   const leads = useMemo(
     () => data.leads.map((lead) => enrichLead(lead, data.settings.targetCountries || [])),

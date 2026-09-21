@@ -11,13 +11,6 @@ export function getIntegrationStatus() {
   return requestJson("/api/integrations/status");
 }
 
-export function setupTelegram() {
-  return requestJson("/api/integrations/telegram/setup", {
-    method: "POST",
-    credentials: "same-origin",
-  });
-}
-
 export function searchLeadSource(provider, search) {
   return requestJson("/api/integrations/search", {
     method: "POST",
